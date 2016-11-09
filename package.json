@@ -1,0 +1,19 @@
+{
+  "name": "better_node_forex",
+  "version": "0.0.0",
+  "description": "this is better node forex",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "RuanShan/better_node_forex"
+  },
+  "keywords": [
+    "node",
+    "forex"
+  ],
+  "author": "david",
+  "license": "BSD"
+}
