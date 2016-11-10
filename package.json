@@ -15,5 +15,9 @@
     "forex"
   ],
   "author": "david",
-  "license": "BSD"
+  "license": "BSD",
+  "dependencies": {
+    "express": "~4.14.0",
+    "express-sse": "~0.4.1"
+  }
 }

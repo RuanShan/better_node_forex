@@ -37,7 +37,7 @@ var g_exchanges = null;
 
 function update_state() {
     var now = new Date();
-    if( now - g_exchanges.lastupdate > 3000) {//g_exchanges.push_count==10) { ////
+    if( now - g_exchanges.lastupdate > 5000) {//g_exchanges.push_count==10) { ////
         // => [Error: EISDIR: illegal operation on a directory, open <directory>]
       logger.info("update_state closed at %s.",  moment().format('X'));
       close_connection();
@@ -60,10 +60,9 @@ function startup_connection()
 
 
   g_es.onmessage = function (event) {
-    console.log(event.data);
     var txt = /\[.*\]/.exec(event.data)[0];
     var data = eval(txt);
-console.log("g_exchanges.push_count %s", g_exchanges.push_count );
+    console.log("g_exchanges.push_count %s", g_exchanges.push_count );
     if( g_exchanges.push_count == 0){
       g_taskid = setInterval(update_state, 500);
     }
