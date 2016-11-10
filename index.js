@@ -1,3 +1,5 @@
+var redis   = require('redis');
+var publisherClient = redis.createClient();
 var express = require('express');
 var path = require('path');
 //var favicon = require('serve-favicon');
@@ -13,7 +15,7 @@ var app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
-
+app.set('view options',{ layout: 'layout' });
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
@@ -22,20 +24,22 @@ app.use(logger('dev'));
 //app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+//app.use('/', index);
 //app.use('/users', users);
 app.get('/', function(req, res){
-  res.render('index');
+  res.render('index', { title: 'express'} );
 });
 
-app.get('/stream', function(req, res) {
-  console.debug( "came in " );
+app.get('/sse', function(req, res) {
+  console.log( "came in " );
   // let request last as long as possible
-  req.socket.setTimeout(Infinity);
+  //req.socket.setTimeout(Infinity);
+  req.socket.setNoDelay(true);
 
   var messageCount = 0;
   var subscriber = redis.createClient();
 
-  subscriber.subscribe("updates");
+  subscriber.subscribe("USUSDSGD");
 
   // In case we encounter an error...print it out to the console
   subscriber.on("error", function(err) {
@@ -56,7 +60,7 @@ app.get('/stream', function(req, res) {
     'Cache-Control': 'no-cache',
     'Connection': 'keep-alive'
   });
-  res.write('\n');
+  res.write(':ok\n\n');
 
   // The 'close' event is fired when a user closes their browser window.
   // In that situation we want to make sure our redis channel subscription
@@ -69,7 +73,7 @@ app.get('/stream', function(req, res) {
 });
 
 app.get('/fire-event/:event_name', function(req, res) {
-  publisherClient.publish( 'updates', ('"' + req.params.event_name + '" page visited') );
+  publisherClient.publish( 'USUSDSGD', ('"' + req.params.event_name + '" page visited') );
   res.writeHead(200, {'Content-Type': 'text/html'});
   res.write('All clients have received "' + req.params.event_name + '"');
   res.end();

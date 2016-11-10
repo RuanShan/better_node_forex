@@ -1,14 +1,13 @@
-!!!
+doctype html
 html
   head
-    title SSEs, Node.js, and Redis
+    title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
-  body
-    != body
-    script(type='text/javascript')
-      var source = new EventSource('/update-stream');
-
+    script(type='text/javascript').
+      var source = new EventSource('/sse');
       source.addEventListener('message', function(e) {
         console.log(e);
-        $('ul').append('<li>' + e.data + ' (message id: ' + e.lastEventId + ')</li>');
       }, false);
+
+  body
+    block content

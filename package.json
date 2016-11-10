@@ -18,6 +18,9 @@
   "license": "BSD",
   "dependencies": {
     "express": "~4.14.0",
-    "express-sse": "~0.4.1"
+    "express-sse": "~0.4.1",
+    "debug": "~2.2.0",
+    "jade": "~1.11.0",
+    "morgan": "~1.7.0",
   }
 }
