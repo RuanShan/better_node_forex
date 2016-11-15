@@ -3,11 +3,9 @@ html
   head
     title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
-    script(type='text/javascript').
-      var source = new EventSource('/sse');
-      source.addEventListener('message', function(e) {
-        console.log(e);
-      }, false);
+    script(src='http://cdn.hcharts.cn/jquery/jquery-1.8.3.min.js')
+    script(src='http://cdn.hcharts.cn/highstock/highstock.js')
+    script(src='/javascripts/better.js').
 
   body
     block content

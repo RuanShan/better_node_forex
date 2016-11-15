@@ -1,3 +1,4 @@
+var moment = require('moment');// datetime
 var redis   = require('redis');
 var publisherClient = redis.createClient();
 var express = require('express');
@@ -13,7 +14,7 @@ var logger = require('morgan');
 var app = express();
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
+app.set('views',   path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.set('view options',{ layout: 'layout' });
 // uncomment after placing your favicon in /public
@@ -30,17 +31,32 @@ app.get('/', function(req, res){
   res.render('index', { title: 'express'} );
 });
 
-app.get('/sse', function(req, res) {
+app.get('/sse/:symbol', function(req, res) {
+  var availableSymbols = ["USUSDSGD"]
   console.log( "came in " );
   // let request last as long as possible
-  //req.socket.setTimeout(Infinity);
+  // req.socket.setTimeout(Infinity);
   req.socket.setNoDelay(true);
-
+  var symbol = "USUSDSGD"
   var messageCount = 0;
   var subscriber = redis.createClient();
 
-  subscriber.subscribe("USUSDSGD");
+  var key = ["Z", symbol, moment().startOf('week').startOf('day').format('x')].join("_");
 
+  var args = [key, parseInt(moment().startOf('day').format('x')), parseInt(moment().format('x'))];
+
+  publisherClient.zrangebyscore(args, function(err, response) {
+     if (err) throw err;
+     messageCount++;
+     var data =  {};
+     data[symbol] = response;
+     //console.log(data);
+     res.write('id: ' + messageCount + '\n');
+     res.write('data: ' + JSON.stringify(data) + '\n');
+     res.write('\n\n');
+  });
+
+  subscriber.subscribe(symbol);
   // In case we encounter an error...print it out to the console
   subscriber.on("error", function(err) {
     console.log("Redis Error: " + err);
@@ -49,9 +65,11 @@ app.get('/sse', function(req, res) {
   // When we receive a message from the redis connection
   subscriber.on("message", function(channel, message) {
     messageCount++; // Increment our message count
-
+    var data = {messageCount: messageCount};
+    data[channel]= message;
     res.write('id: ' + messageCount + '\n');
-    res.write("data: " + message + '\n\n'); // Note the extra newline
+    res.write('data: ' + JSON.stringify( data ) + '\n');
+    res.write('\n\n'); // Note the extra newline
   });
 
   //send headers for event-stream connection
@@ -60,7 +78,9 @@ app.get('/sse', function(req, res) {
     'Cache-Control': 'no-cache',
     'Connection': 'keep-alive'
   });
-  res.write(':ok\n\n');
+
+
+
 
   // The 'close' event is fired when a user closes their browser window.
   // In that situation we want to make sure our redis channel subscription
@@ -73,7 +93,7 @@ app.get('/sse', function(req, res) {
 });
 
 app.get('/fire-event/:event_name', function(req, res) {
-  publisherClient.publish( 'USUSDSGD', ('"' + req.params.event_name + '" page visited') );
+  //publisherClient.publish( 'USUSDSGD', ('"' + req.params.event_name + '" page visited') );
   res.writeHead(200, {'Content-Type': 'text/html'});
   res.write('All clients have received "' + req.params.event_name + '"');
   res.end();

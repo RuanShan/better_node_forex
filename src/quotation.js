@@ -9,7 +9,6 @@ function  Quotation( exchange_description, data, time ) {
     //attr_accessor :new_value, :last_settle, :open_value, :high_value, :low_value, :close_value
 
     //#DUSD	美汇澳元 4
-
       this.update_field_values = function(){
         if( this.data[ exchange_description.field_price_index ] )
         {
