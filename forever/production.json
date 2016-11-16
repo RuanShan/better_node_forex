@@ -1,0 +1,9 @@
+// forever/production.json
+{
+    // Comments are supported
+    "uid": "development",
+    "append": true,
+    "watch": true,
+    "script": "forex.js",
+    "sourceDir": "/home/deploy/www/better_node_forex"
+}
