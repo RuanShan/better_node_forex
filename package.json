@@ -1,8 +1,8 @@
 {
   "name": "better_node_forex",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "this is better node forex",
-  "main": "app.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -18,9 +18,9 @@
   "license": "BSD",
   "dependencies": {
     "express": "~4.14.0",
-    "express-sse": "~0.4.1",
     "debug": "~2.2.0",
     "jade": "~1.11.0",
-    "morgan": "~1.7.0",
+    "log": "~1.4.0",
+    "morgan": "~1.7.0"
   }
 }
