@@ -32,11 +32,11 @@ app.get('/', function(req, res){
 });
 
 app.get('/sse/:symbol', function(req, res) {
-  var availableSymbols = ["USUSDSGD"]
+  var availableSymbols = ["USEURUSD"]
   // let request last as long as possible
   // req.socket.setTimeout(Infinity);
   req.socket.setNoDelay(true);
-  var symbol = "USUSDSGD"
+  var symbol = "USEURUSD"
   var messageCount = 0;
   var subscriber = redis.createClient();
 
@@ -92,7 +92,6 @@ app.get('/sse/:symbol', function(req, res) {
 });
 
 app.get('/fire-event/:event_name', function(req, res) {
-  //publisherClient.publish( 'USUSDSGD', ('"' + req.params.event_name + '" page visited') );
   res.writeHead(200, {'Content-Type': 'text/html'});
   res.write('All clients have received "' + req.params.event_name + '"');
   res.end();

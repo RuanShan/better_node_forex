@@ -54,7 +54,7 @@ function ConvertIntegerToCorrectRate( symbol, val  )
 
 
 $(function () {
-  var symbols = ['USUSDSGD'];
+  var symbols = ['USEURUSD'];
     Highcharts.setOptions({
         global : {
             useUTC : false
@@ -88,7 +88,7 @@ $(function () {
 });
 
 function InitializeChart(message){
-  var symbol = 'USUSDSGD'
+  var symbol = 'USEURUSD'
   // Create the chart
   var chart = new Highcharts.StockChart("chart",{
       chart: {
