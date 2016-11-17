@@ -31,10 +31,13 @@ ExchangeCollection.prototype.pushMessage = function (data, time ) {
         {
           var item = data[i];
           this.symbol = item[0];
+          console.log(" initial %s, %s", i, this.symbol);
           this.exchange_map[i] = new ExchangeDescription( this.symbol, this.fields, time, this.exchange_redis_store);
           this.exchange_map[i].pushMessage( item, time );
         }
       }else{
+        console.log( "start to handle changed rates");
+        var pushed_symbol_indexes = [];
         for( var i = 0; i< data.length; i++ )
         {
           var item = data[i];
@@ -42,9 +45,22 @@ ExchangeCollection.prototype.pushMessage = function (data, time ) {
           {
             var symbol_index = item[0];
             var exchange = this.exchange_map[symbol_index];
+            //console.log("%s, %s", symbol_index, exchange.symbol);
             exchange.pushMessage( item, time );
+            pushed_symbol_indexes[symbol_index] = true;
           }
+        }
+        // 处理没有变化的数据
+        console.log( "start to handle no changed rates");
+        for( var i = 0; i< this.exchange_symbols.length; i++)
+        {
+          if( !pushed_symbol_indexes[i] )
+          {
 
+            var exchange = this.exchange_map[i];
+            //console.log("%s, %s", i, exchange.symbol);
+            exchange.pushMessage( [i,0], time );
+          }
         }
       }
 

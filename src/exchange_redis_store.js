@@ -40,7 +40,10 @@ function  ExchangeRedisStore(  ) {
         //console.log("store Quotation %s,%s, %s", zkey,  obj.new_value, obj.time.format('x') );
         //this.client.hmset( hmkey, parseInt(obj.time.format('x')), obj.new_value )
         // it has to be uniq, add Timestamp as suffix
-        this.client.zadd( [zkey, obj.time.format('x'), val] )
+        if( obj.delta >0 )
+        {
+          this.client.zadd( [zkey, obj.time.format('x'), val] )
+        }
       }
       this.client.publish( obj.symbol, val )
     }

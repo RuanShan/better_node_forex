@@ -42,11 +42,13 @@ ExchangeDescription.prototype.pushMessage = function (data, time ) {
     this.initialize_fields( data )
     this.exchange_redis_store.store( this )
   }else{
-    var new_quotation = new Quotation( this, data, time )
-    this.quotations.push( new_quotation )
-    console.log( this.symbol + " " + time.format("HH:mm:ss") + " " + new_quotation.new_value );
-    logger.debug( this.symbol + " " + new_quotation.new_value );
-    this.exchange_redis_store.store( new_quotation )
+
+      var new_quotation = new Quotation( this, data, time )
+      this.quotations.push( new_quotation )
+      console.log( this.symbol + " " + time.format("HH:mm:ss") + " " + new_quotation.new_value );
+      logger.debug( this.symbol + " " + new_quotation.new_value );
+      this.exchange_redis_store.store( new_quotation )
+  
   }
 }
 
