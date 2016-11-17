@@ -91,6 +91,9 @@ function InitializeChart(message){
   var symbol = 'USEURUSD'
   // Create the chart
   var chart = new Highcharts.StockChart("chart",{
+    credits: {
+      enabled: false
+    },
       chart: {
       },
       navigator: {
