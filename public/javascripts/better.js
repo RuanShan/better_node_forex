@@ -94,26 +94,10 @@ function InitializeChart(message){
       chart: {
       },
       navigator: {
-        enabled : false
+        height: 0
       },
       scrollbar: {
         enabled : false
-      },
-      plotOptions:{
-        area: {
-          dataGrouping: {
-            dateTimeLabelFormats:{
-              millisecond: ['%H:%M:%S.%L', '%H:%M:%S.%L', '-%H:%M:%S.%L'],
-              second: ['%H:%M:%S', '%H:%M:%S', '-%H:%M:%S'],
-              minute: ['%A, %b %e, %H:%M', '%A, %b %e, %H:%M', '-%H:%M'],
-              hour: ['%A, %b %e, %H:%M', '%A, %b %e, %H:%M', '-%H:%M'],
-              day: ['%A, %b %e, %Y', '%A, %b %e', '-%A, %b %e, %Y'],
-              week: ['Week from %A, %b %e, %Y', '%A, %b %e', '-%A, %b %e, %Y'],
-              month: ['%B %Y', '%B', '-%B %Y'],
-              year: ['%Y', '%Y', '-%Y'],
-            }
-          }
-        }
       },
       tooltip: {
         valueDecimals: 4,
@@ -121,8 +105,7 @@ function InitializeChart(message){
                 var s = '<b>' + Highcharts.dateFormat('%H:%M:%S', this.x) + '</b>';
                 s += '<br/><b>' +Highcharts.numberFormat(this.y, 4) + '</b>';
                 return s;
-        },
-        pointFormat: "<b>{point.y}</b>"
+        }
       },
       yAxis:{
         labels:
@@ -131,16 +114,6 @@ function InitializeChart(message){
             return format_float( this.value, 4);
           }
         }
-      },
-      xAxis: {
-        type: 'datetime',
-        range: 3600 * 1000,
-        plotLines:[{
-            color:'red',            //线的颜色，定义为红色
-            dashStyle:'longdashdot',//标示线的样式，默认是solid（实线），这里定义为长虚线
-            value:0,                //定义在哪个值上显示标示线，这里是在x轴上刻度为3的值处垂直化一条线
-            width:2                 //标示线的宽度，2px
-        }]
       },
       rangeSelector: {
           buttons: [{
@@ -166,7 +139,7 @@ function InitializeChart(message){
           enabled: false
       },
       series : [{
-          name : 'Random data',
+          name : 'data',
           data : (function () {
             var raw_data = message[symbol];
               // generate an array of random data
@@ -182,10 +155,7 @@ function InitializeChart(message){
           }()),
           lineWidth: 1
 
-      }],
-      legend: {
-          enabled: false
-      }
+      }]
   });
   g_quotation_desc.charts[symbol] = chart;
 }
