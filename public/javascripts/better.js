@@ -7,6 +7,52 @@ var g_quotation_desc = {
     charts: {}
 };
 
+function format_intval(v, digits) {
+    var txt = "";
+
+    if (digits > 0) {
+        var pow = Math.pow(10, digits);
+
+        if (v < pow && v > -pow) {
+            if (v < 0) { txt = "-0."; v = -v; }
+            else { txt = "0."; }
+            var tmp = "" + v;
+            for (var i = tmp.length; i < digits; i++) txt += "0";
+            txt += tmp;
+            return txt;
+        }
+
+        txt += v / pow;
+        if (txt.indexOf("e") != -1) return "-";
+
+        var idx = txt.indexOf(".");
+        if (idx == -1) { txt += "."; idx = txt.length - 1; }
+        for (var i = txt.length - idx - 1; i < digits; i++) txt += "0";
+
+        return txt;
+    }
+
+    txt += v;
+    return txt;
+}
+
+function format_float(val, digits) {
+    var txt = "";
+    if (digits > 0) {
+        var v = Math.round(val * Math.pow(10, digits));
+        return format_intval(v, digits);
+    } else {
+        txt += Math.round(val);
+        return txt;
+    }
+}
+
+function ConvertIntegerToCorrectRate( symbol, val  )
+{
+  return val/10000;
+}
+
+
 $(function () {
   var symbols = ['USUSDSGD'];
     Highcharts.setOptions({
@@ -25,11 +71,15 @@ $(function () {
       }else{
         for( var i = 0; i< symbols.length; i++)
         {
-          var time_price = data[symbols[i]];
+          var symbol = symbols[i];
+          var time_price = data[symbol];
           var time = (new Date( parseInt(time_price) )).getTime();
-          var price= parseInt(time_price.split('_')[1]);
+          var price= ConvertIntegerToCorrectRate( symbol, parseInt(time_price.split('_')[1]));
           console.log("data=%s,%s", time, price);
-          g_quotation_desc.charts[symbols[i]].series[0].addPoint([time, price], true,true);
+          g_quotation_desc.charts[symbol].series[0].addPoint([time, price], true,true);
+
+          // new point added
+          //g_quotation_desc.charts[symbols[i]].yAxis[0].plotLines[0].value = price;
         }
       }
       console.log(e);
@@ -43,18 +93,68 @@ function InitializeChart(message){
   var chart = new Highcharts.StockChart("chart",{
       chart: {
       },
+      navigator: {
+        enabled : false
+      },
+      scrollbar: {
+        enabled : false
+      },
+      plotOptions:{
+        area: {
+          dataGrouping: {
+            dateTimeLabelFormats:{
+              millisecond: ['%H:%M:%S.%L', '%H:%M:%S.%L', '-%H:%M:%S.%L'],
+              second: ['%H:%M:%S', '%H:%M:%S', '-%H:%M:%S'],
+              minute: ['%A, %b %e, %H:%M', '%A, %b %e, %H:%M', '-%H:%M'],
+              hour: ['%A, %b %e, %H:%M', '%A, %b %e, %H:%M', '-%H:%M'],
+              day: ['%A, %b %e, %Y', '%A, %b %e', '-%A, %b %e, %Y'],
+              week: ['Week from %A, %b %e, %Y', '%A, %b %e', '-%A, %b %e, %Y'],
+              month: ['%B %Y', '%B', '-%B %Y'],
+              year: ['%Y', '%Y', '-%Y'],
+            }
+          }
+        }
+      },
+      tooltip: {
+        valueDecimals: 4,
+        formatter: function () {
+                var s = '<b>' + Highcharts.dateFormat('%H:%M:%S', this.x) + '</b>';
+                s += '<br/><b>' +Highcharts.numberFormat(this.y, 4) + '</b>';
+                return s;
+        },
+        pointFormat: "<b>{point.y}</b>"
+      },
+      yAxis:{
+        labels:
+        {
+          formatter: function(){
+            return format_float( this.value, 4);
+          }
+        }
+      },
+      xAxis: {
+        type: 'datetime',
+        range: 3600 * 1000,
+        plotLines:[{
+            color:'red',            //线的颜色，定义为红色
+            dashStyle:'longdashdot',//标示线的样式，默认是solid（实线），这里定义为长虚线
+            value:0,                //定义在哪个值上显示标示线，这里是在x轴上刻度为3的值处垂直化一条线
+            width:2                 //标示线的宽度，2px
+        }]
+      },
       rangeSelector: {
           buttons: [{
-              count: 1,
+            count: 60,
               type: 'minute',
-              text: '1M'
+              text: '60M'
           }, {
-              count: 5,
+              count: 30,
               type: 'minute',
-              text: '5M'
+              text: '30M'
           }, {
-              type: 'all',
-              text: 'All'
+              count: 15,
+              type: 'minute',
+              text: '15M'
           }],
           inputEnabled: false,
           selected: 0
@@ -75,12 +175,17 @@ function InitializeChart(message){
               for (var i = 0; i < raw_data.length; i += 1) {
                 data.push([
                   (new Date( parseInt(raw_data[i]) )).getTime(),
-                  parseInt(raw_data[i].split('_')[1])
+                  ConvertIntegerToCorrectRate( symbol, parseInt(raw_data[i].split('_')[1]))
                 ]);
               }
               return data;
-          }())
-      }]
+          }()),
+          lineWidth: 1
+
+      }],
+      legend: {
+          enabled: false
+      }
   });
   g_quotation_desc.charts[symbol] = chart;
 }

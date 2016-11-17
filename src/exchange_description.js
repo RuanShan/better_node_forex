@@ -31,7 +31,8 @@ function  ExchangeDescription( symbol, fields, time, exchange_redis_store ) {
       this.high_value =item[6];
       this.low_value = item[7];
       this.close_value = item[8];
-      console.log( "initial " + symbol + time.format("HH:mm:ss")+ " " + this.new_value +","+ this.last_settle +"," + this.open_value +","+ this.high_value+","+ this.low_value +","+ this.close_value );
+      console.log( "initial " + symbol + time.format("HH:mm:ss")+ " " + this.new_value );
+      logger.debug( "initial " + symbol + " " + this.new_value );
     }
 }
 
@@ -44,6 +45,7 @@ ExchangeDescription.prototype.pushMessage = function (data, time ) {
     var new_quotation = new Quotation( this, data, time )
     this.quotations.push( new_quotation )
     console.log( this.symbol + " " + time.format("HH:mm:ss") + " " + new_quotation.new_value );
+    logger.debug( this.symbol + " " + new_quotation.new_value );
     this.exchange_redis_store.store( new_quotation )
   }
 }

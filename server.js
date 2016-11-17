@@ -33,7 +33,6 @@ app.get('/', function(req, res){
 
 app.get('/sse/:symbol', function(req, res) {
   var availableSymbols = ["USUSDSGD"]
-  console.log( "came in " );
   // let request last as long as possible
   // req.socket.setTimeout(Infinity);
   req.socket.setNoDelay(true);
