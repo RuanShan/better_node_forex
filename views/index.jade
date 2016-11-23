@@ -2,4 +2,12 @@ extends layout
 block content
   h1= title
   p Welcome to #{title}
-  div#chart.chart(data-symbol='USEURUSD')
+  .forex
+    a(href='/forex/USEURUSD') 美汇欧元
+    a(href='/forex/USUSDCNY') 人民币
+    a(href='/forex/USUSDCAD') 美汇加元
+    a(href='/forex/USGBPUSD') 美汇英镑
+    a(href='/forex/USGBPUSD,USUSDCNY') 人民币和美汇英镑
+
+  - for (var i = 0; i < symbols.length; i++)
+    div.chart(id='char#{i}' data-symbol='#{symbols[i]}')
