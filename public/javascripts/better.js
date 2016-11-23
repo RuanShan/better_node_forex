@@ -98,6 +98,7 @@ function InitializeChart(message){
 
   $(".chart").each(function(){
     var $container = $(this);
+    var symbol = $container.data('symbol');
 
     var chart = new Highcharts.StockChart({
       credits: {
@@ -146,7 +147,7 @@ function InitializeChart(message){
             selected: 0
         },
         title : {
-            text : 'Live random data'
+            text : symbol
         },
         exporting: {
             enabled: false
@@ -155,7 +156,7 @@ function InitializeChart(message){
             name : 'data',
             data : (function () {
               //var container = $("#"+this.renderTo);
-              var symbol = $container.data('symbol');
+              //var symbol = $container.data('symbol');
               var raw_data = message[symbol];
                 // generate an array of random data
                 var data = [];
@@ -172,7 +173,6 @@ function InitializeChart(message){
 
         }]
     });
-    var symbol = $container.data('symbol');
     g_quotation_desc.charts[symbol] = chart;
 
   })
