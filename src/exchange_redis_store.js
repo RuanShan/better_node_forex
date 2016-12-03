@@ -4,6 +4,8 @@ var ExchangeDescription = require("./exchange_description")
 var Quotation = require("./quotation")
 
 function  ExchangeRedisStore(  ) {
+  this.symbol_expire_at = {};
+
     this.client = redis.createClient();
     this.client.on("error", function(err) {
     	logger.error("redis error %s",  err);
@@ -11,6 +13,19 @@ function  ExchangeRedisStore(  ) {
     this.client.on("ready", function(err) {
     	logger.info("redis ready");
     });
+
+    this.set_expire = function( obj ){
+      var symbol = obj.symbol;
+      var now = moment(obj.time);
+      var expire_at = now.startOf('week').startOf('day').format('x');
+      var key = this.build_zkey( symbol, now);
+      if( this.symbol_expire_at[symbol] != expire_at)
+      {
+        this.client.expireat([key, expire_at], function(){
+        })
+        this.symbol_expire_at[symbol] = expire_at;
+      }
+    }
 
     this.store = function( obj )
     {
@@ -45,7 +60,13 @@ function  ExchangeRedisStore(  ) {
           this.client.zadd( [zkey, obj.time.format('x'), val] )
         }
       }
-      this.client.publish( obj.symbol, val )
+      this.set_expire( obj);
+      this.client.publish( obj.symbol, val );
+    }
+
+    this.build_zkey = function( symbol, now){
+      var key = "Z_"+ symbol +"_"+  now.startOf('week').startOf('day').format('x');
+      return key;
     }
 }
 
