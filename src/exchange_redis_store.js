@@ -19,10 +19,13 @@ function  ExchangeRedisStore(  ) {
       var now = moment(obj.time);
       var expire_at = now.startOf('week').startOf('day').add(2, 'weeks').format('x');
       expire_at = parseInt(expire_at );
-      var key = this.build_zkey( symbol, now);
+      var key = this.build_zkey( symbol, obj.time);
       if( this.symbol_expire_at[symbol] != expire_at)
       {
-        this.client.expireat([key, expire_at], function(){   })
+        this.client.expireat([key, expire_at], function(err, response){
+            if (err) throw err;
+            //console.log("key=%s,expire_at=%s,response=%s",key,expire_at,response);
+        })
         this.symbol_expire_at[symbol] = expire_at;
         console.log("redis key %s expire at %s", symbol, expire_at);
       }
