@@ -17,13 +17,14 @@ function  ExchangeRedisStore(  ) {
     this.set_expire = function( obj ){
       var symbol = obj.symbol;
       var now = moment(obj.time);
-      var expire_at = now.startOf('week').startOf('day').format('x');
+      var expire_at = now.startOf('week').startOf('day').add(2, 'weeks').format('x');
+      expire_at = parseInt(expire_at );
       var key = this.build_zkey( symbol, now);
       if( this.symbol_expire_at[symbol] != expire_at)
       {
-        this.client.expireat([key, expire_at], function(){
-        })
+        this.client.expireat([key, expire_at], function(){   })
         this.symbol_expire_at[symbol] = expire_at;
+        console.log("redis key %s expire at %s", symbol, expire_at);
       }
     }
 
