@@ -107,6 +107,7 @@ app.get('/sse/:symbols', function(req, res) {
 
   //send headers for event-stream connection
   res.writeHead(200, {
+    'Access-Control-Allow-Origin': '*',
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
     'Connection': 'keep-alive'
