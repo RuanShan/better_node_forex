@@ -19,7 +19,7 @@ function  ExchangeRedisStore(  ) {
       var now = moment(obj.time);
       var key = this.build_zkey( symbol, now);
       //var expire_at = now.startOf('week').startOf('day').add(2, 'weeks').format('x');
-      var expire_at = now.startOf('week').startOf('day').add(2, 'days').format('x');
+      var expire_at = now.startOf('week').startOf('day').add(1, 'weeks').format('x');
       expire_at = parseInt(expire_at );
       if( this.symbol_expire_at[symbol] != expire_at)
       {
