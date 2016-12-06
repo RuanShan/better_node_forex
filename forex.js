@@ -10,6 +10,7 @@ var ExchangeDescription = require("./src/exchange_description")
 var EventSource = require('eventsource');
 
 var fields = ['Price','LastSettle','Open','High','Low','Close']
+// 美汇澳元,美元指数,美汇欧元,美汇英镑,美汇纽元,美汇加元,美汇瑞士,美汇港元,美汇日元,美元兑葡币	,美汇马币,美汇新元,美汇台币
 var symbols = [ 'USAUDUSD','USDINIW','USEURUSD','USGBPUSD','USNZDUSD','USUSDCAD','USUSDCHF','USUSDCNY','USUSDHKD','USUSDJPY','USUSDMOP','USUSDMYR','USUSDSGD','USUSDTWD']
 
 var url = "http://www.baring.cn/quo/bin/quotation.dll?fields=Price,LastSettle,Open,High,Low,Close,&symbols=USAUDUSD,USDINIW,USEURUSD,USGBPUSD,USNZDUSD,USUSDCAD,USUSDCHF,USUSDCNY,USUSDHKD,USUSDJPY,USUSDMOP,USUSDMYR,USUSDSGD,USUSDTWD,"

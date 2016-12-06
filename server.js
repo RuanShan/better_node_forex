@@ -57,7 +57,7 @@ app.get('/sse/:symbols', function(req, res) {
     var symbol = symbols[i];
     var key = ["Z", symbol, moment().startOf('week').startOf('day').format('x')].join("_");
 
-    var args = [key, parseInt(moment().startOf('day').format('x')), parseInt(moment().format('x'))];
+    var args = [key, parseInt(moment().subtract(90,'minutes').format('x')), parseInt(moment().format('x'))];
 
     publisherClient.zrangebyscore(args, function(err, response) {
       if (err) throw err;
