@@ -39,6 +39,20 @@ app.get('/forex/:symbols', function(req, res){
   res.render('index', { title: 'express', symbols: symbols} );
 });
 
+app.get('/forex_history/:symbol',function(req, res){
+  var symbol =  req.params.symbol || defualt_symbols;
+  var key = ["Z", symbol, moment().startOf('week').startOf('day').format('x')].join("_");
+  var args = [key, parseInt(moment().subtract(60,'minutes').format('x')), parseInt(moment().format('x'))];
+  //console.log("yes in forex_history, symbol= %s, args=%s", symbol,args);
+
+  publisherClient.zrangebyscore(args, function(err, response) {
+    if (err) throw err;
+    res.header({'Access-Control-Allow-Origin': '*'}).json(response);
+    return
+  });
+
+});
+
 app.get('/sse/:symbols', function(req, res) {
   var availableSymbols = ["USEURUSD"]
   var symbols =  req.params.symbols || "USEURUSD,USGBPUSD";
@@ -113,9 +127,6 @@ app.get('/sse/:symbols', function(req, res) {
     'Connection': 'keep-alive'
   });
 
-
-
-
   // The 'close' event is fired when a user closes their browser window.
   // In that situation we want to make sure our redis channel subscription
   // is properly shut down to prevent memory leaks...and incorrect subscriber
@@ -125,6 +136,54 @@ app.get('/sse/:symbols', function(req, res) {
     subscriber.quit();
   });
 });
+
+app.get('/sse_one/:symbol', function(req, res) {
+
+   res.writeHead(200, {
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+    "Access-Control-Allow-Origin": "*"
+  });
+
+  var padding = new Array(2049);
+  res.write(":" + padding.join(" ") + "\n"); // 2kB padding for IE
+  res.write("retry: 2000\n");
+
+  var lastEventId = Number(req.headers["last-event-id"]) || Number(req.params.lastEventId) || 0;
+
+  var timeoutId = 0;
+  var messageCount = lastEventId;
+
+  // let request last as long as possible
+  // req.socket.setTimeout(Infinity);
+  req.socket.setNoDelay(true);
+  var symbol =  req.params.symbol || "USEURUSD"
+  var key = ["Z", symbol, moment().startOf('week').startOf('day').format('x')].join("_");
+  var args = [key, parseInt(moment().subtract(60,'minutes').format('x')), parseInt(moment().format('x'))];
+
+  var subscriber = redis.createClient();
+  subscriber.subscribe(symbol);
+  // In case we encounter an error...print it out to the console
+  subscriber.on("error", function(err) {
+    console.log("Redis Error: " + err);
+  });
+
+  // When we receive a message from the redis connection
+  subscriber.on("message", function(channel, message) {
+    messageCount++; // Increment our message count
+    var data = {messageCount: messageCount};
+    data[channel]= message;
+    res.write('id: ' + messageCount + '\n');
+    res.write('data: ' + JSON.stringify( data ) + '\n');
+    res.write('\n\n'); // Note the extra newline
+  });
+
+  req.on("close", function() {
+    subscriber.unsubscribe();
+    subscriber.quit();
+  });
+});
+
 
 app.get('/fire-event/:event_name', function(req, res) {
   res.writeHead(200, {'Content-Type': 'text/html'});
