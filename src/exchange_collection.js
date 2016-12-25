@@ -58,7 +58,7 @@ ExchangeCollection.prototype.pushMessage = function (data, time ) {
           {
 
             var exchange = this.exchange_map[i];
-            //console.log("%s, %s", i, exchange.symbol);
+            console.log("%s, %s", i, exchange.symbol);
             exchange.pushMessage( [i,0], time );
           }
         }

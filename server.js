@@ -184,6 +184,65 @@ app.get('/sse_one/:symbol', function(req, res) {
   });
 });
 
+app.get('/sse_ones/:symbols', function(req, res) {
+
+  var symbols =  req.params.symbols || "USEURUSD,USGBPUSD";
+  symbols = symbols.split(',');
+  // let request last as long as possible
+  // req.socket.setTimeout(Infinity);
+  req.socket.setNoDelay(true);
+
+  var messageCount = 0;
+  var initialSymbolCount = 0;
+  var subscriber = redis.createClient();
+  var initialData =  {};
+
+  for( var i=0; i< symbols.length; i++)
+  {
+    var symbol = symbols[i];
+    subscriber.subscribe(symbol);
+  }
+  // In case we encounter an error...print it out to the console
+  subscriber.on("error", function(err) {
+    console.log("Redis Error: " + err);
+  });
+
+  var currentData = {}
+  var symbolCount = 0;
+  // When we receive a message from the redis connection
+  subscriber.on("message", function(channel, message) {
+    currentData[channel]= message;
+    symbolCount++;
+    if(symbolCount == symbols.length )
+    {
+      messageCount++; // Increment our message count
+      currentData['messageCount'] =  messageCount;
+      res.write('id: ' + messageCount + '\n');
+      res.write('data: ' + JSON.stringify( currentData ) + '\n');
+      res.write('\n\n'); // Note the extra newline
+      currentData = {};
+      symbolCount = 0;
+    }
+  });
+
+  //send headers for event-stream connection
+  res.writeHead(200, {
+    'Access-Control-Allow-Origin': '*',
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
+  });
+
+  // The 'close' event is fired when a user closes their browser window.
+  // In that situation we want to make sure our redis channel subscription
+  // is properly shut down to prevent memory leaks...and incorrect subscriber
+  // counts to the channel.
+  req.on("close", function() {
+    subscriber.unsubscribe();
+    subscriber.quit();
+  });
+});
+
 
 app.get('/fire-event/:event_name', function(req, res) {
   res.writeHead(200, {'Content-Type': 'text/html'});

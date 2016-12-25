@@ -45,7 +45,7 @@ function  ExchangeRedisStore(  ) {
       var key = obj.symbol +"_"+  now.startOf('week').startOf('day').format('x');
       var hmkey = "HM_" + key;
       var zkey = "Z_" + key;
-      var val = obj.time.format('x') +"_"+ obj.new_value; // we could order it in client.
+      var val = obj.time.format('x') +"_" + obj.new_value +"_" + obj.new_open_value+"_"+ obj.new_high_value+"_"+ obj.new_low_value+"_"+ obj.new_close_value+"_"+ obj.new_last_settle; // we could order it in client.
       if( obj instanceof ExchangeDescription)
       {
           //http://momentjs.com/docs/#/displaying/
@@ -55,12 +55,13 @@ function  ExchangeRedisStore(  ) {
           //this.client.hmset( hmkey, parseInt(obj.time.format('x')), obj.new_value )
           this.client.zadd( [zkey, obj.time.format('x'), val]  )
           //#   redis.zadd("zset", 32.0, "member")
+          console.log("store ExchangeDescription %s,%s", zkey, val );
       }
       else if ( obj instanceof Quotation) {
-        //console.log("store Quotation %s,%s, %s", zkey,  obj.new_value, obj.time.format('x') );
+        console.log("store Quotation %s,%s", zkey, val  );
         //this.client.hmset( hmkey, parseInt(obj.time.format('x')), obj.new_value )
         // it has to be uniq, add Timestamp as suffix
-        if( obj.delta >0 )
+        if( obj.store_required )
         {
           this.client.zadd( [zkey, obj.time.format('x'), val] )
         }
