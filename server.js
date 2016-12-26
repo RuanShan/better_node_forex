@@ -197,14 +197,14 @@ app.get('/sse_ones/:symbols', function(req, res) {
   var subscriber = redis.createClient();
   var initialData =  {};
 
-  console.log("sse_ones before subscribe");
+  //console.log("sse_ones before subscribe");
 
   for( var i=0; i< symbols.length; i++)
   {
     var symbol = symbols[i];
     subscriber.subscribe(symbol);
   }
-  console.log("sse_ones after subscribe");
+  //console.log("sse_ones after subscribe");
   // In case we encounter an error...print it out to the console
   subscriber.on("error", function(err) {
     console.log("Redis Error: " + err);
