@@ -32,7 +32,7 @@ ExchangeCollection.prototype.pushMessage = function (data, time ) {
           var item = data[i];
           this.symbol = item[0];
           console.log(" initial %s, %s", i, this.symbol);
-          this.exchange_map[i] = new ExchangeDescription( this.symbol, this.fields, time, this.exchange_redis_store);
+          this.exchange_map[i] = new ExchangeDescription( this.symbol, this.fields, (time), this.exchange_redis_store);
           this.exchange_map[i].pushMessage( item, time );
         }
       }else{

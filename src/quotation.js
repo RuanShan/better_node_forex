@@ -20,8 +20,9 @@ function  Quotation( exchange_description, data, time ) {
 
   //#DUSD	美汇澳元 4
   this.update_field_values = function(){
-    for( i =0;i< this.field_indexes.lenght; i++)
+    for( i =0;i< this.field_indexes.length; i++)
     {
+      //console.log( "data [%i]=%s",i, data[ this.field_indexes[i] ]);
       if( data[ this.field_indexes[i] ] != null )
       {
         this.field_deltas[i] = data[ this.field_indexes[i] ];

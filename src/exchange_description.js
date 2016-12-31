@@ -34,7 +34,7 @@ function  ExchangeDescription( symbol, fields, time, exchange_redis_store ) {
       this.new_low_value = item[7];
       this.new_close_value = item[8];
       console.log( "initial " + symbol + time.format("HH:mm:ss")+ " " + this.new_value );
-      logger.debug( "initial " + symbol + " " + this.new_value );
+      //logger.debug( "initial " + symbol + " " + this.new_value );
     }
 }
 
