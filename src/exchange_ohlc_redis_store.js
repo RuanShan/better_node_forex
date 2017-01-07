@@ -1,17 +1,16 @@
 var moment = require('moment');
 var redis = require("redis");
-var ExchangeDescription = require("./exchange_description")
-var Quotation = require("./quotation")
+var ExchangeOhlcQuotation = require("./exchange_ohlc_quotation")
 
 function  ExchangeOhlcRedisStore(  ) {
   this.symbol_expire_at = {};
 
     this.client = redis.createClient();
     this.client.on("error", function(err) {
-    	logger.error("redis error %s",  err);
+    	console.log("redis error %s",  err);
     });
     this.client.on("ready", function(err) {
-    	logger.info("redis ready");
+    	console.log("redis ready");
     });
 
     this.set_expire = function( obj ){
@@ -42,8 +41,8 @@ function  ExchangeOhlcRedisStore(  ) {
       //  #ZADD key score1 member1 [score2 member2]
       //  #向有序集合添加一个或多个成员，或者更新已存在成员的分数
       var zkey = this.build_zkey( obj.symbol, moment(obj.time) )
-      var val = obj.time.format('x') +"_" + obj.new_value +"_" + obj.new_open_value+"_"+ obj.new_high_value+"_"+ obj.new_low_value+"_"+ obj.new_close_value+"_"+ obj.new_last_settle; // we could order it in client.
-      if( obj instanceof ExchangeDescription)
+      var val = obj.time.format('x') +"_" + obj.open+"_"+ obj.high+"_"+ obj.low+"_"+ obj.close ; // we could order it in client.
+      if( obj instanceof ExchangeOhlcQuotation)
       {
           //http://momentjs.com/docs/#/displaying/
           //Unix Timestamp	X	1360013296
@@ -51,7 +50,7 @@ function  ExchangeOhlcRedisStore(  ) {
           // 一周过期，键值 = 数据格式类型 + 业务类型 + 一周开始时间
           this.client.zadd( [zkey, obj.time.format('x'), val]  )
           //#   redis.zadd("zset", 32.0, "member")
-          console.log("store ExchangeDescription %s,%s", zkey, val );
+          console.log("store ExchangeOhlcQuotation %s,%s", zkey, val );
       }
 
       this.set_expire( obj);

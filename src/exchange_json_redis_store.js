@@ -1,9 +1,9 @@
 var moment = require('moment');
 var redis = require("redis");
-var ExchangeDescription = require("./exchange_description")
-var Quotation = require("./quotation")
+var ExchangeJsonDescription = require("./exchange_json_description")
+var ExchangeJsonQuotation = require("./exchange_json_quotation")
 
-function  ExchangeRedisStore(  ) {
+function  ExchangeJsonRedisStore(  ) {
   this.symbol_expire_at = {};
 
     this.client = redis.createClient();
@@ -41,30 +41,22 @@ function  ExchangeRedisStore(  ) {
 
       //  #ZADD key score1 member1 [score2 member2]
       //  #向有序集合添加一个或多个成员，或者更新已存在成员的分数
+      var symbol = obj.symbol;
       var now = moment(obj.time);
-      var key = obj.symbol +"_"+  now.startOf('week').startOf('day').format('x');
-      var hmkey = "HM_" + key;
-      var zkey = "Z_" + key;
-      var val = obj.time.format('x') +"_" + obj.new_value +"_" + obj.new_open_value+"_"+ obj.new_high_value+"_"+ obj.new_low_value+"_"+ obj.new_close_value+"_"+ obj.new_last_settle; // we could order it in client.
-      if( obj instanceof ExchangeOhlcQuotation )
-      {
+      var key = symbol +"_"+  now.startOf('week').startOf('day').format('x');
+      var zkey = this.build_zkey( symbol, now);
+      var val = obj.time.format('x') +"_" + obj.new_value+"_" + obj.price_timestamp; // we could order it in client.
+
           //http://momentjs.com/docs/#/displaying/
           //Unix Timestamp	X	1360013296
           //Unix Millisecond Timestamp	x	1360013296123
           // 一周过期，键值 = 数据格式类型 + 业务类型 + 一周开始时间
           //this.client.hmset( hmkey, parseInt(obj.time.format('x')), obj.new_value )
-          this.client.zadd( [zkey, obj.time.format('x'), val]  )
-          //#   redis.zadd("zset", 32.0, "member")
-          console.log("store ExchangeOhlcQuotation %s,%s", zkey, val );
-      }
-      else if ( obj instanceof Quotation) {
+      if ( obj instanceof ExchangeJsonQuotation) {
         console.log("store Quotation %s,%s", zkey, val  );
         //this.client.hmset( hmkey, parseInt(obj.time.format('x')), obj.new_value )
         // it has to be uniq, add Timestamp as suffix
-        if( obj.store_required )
-        {
-          this.client.zadd( [zkey, obj.time.format('x'), val] )
-        }
+        this.client.zadd( [zkey, obj.time.format('x'), val] )
       }
       this.set_expire( obj);
       this.client.publish( obj.symbol, val );
@@ -76,6 +68,6 @@ function  ExchangeRedisStore(  ) {
     }
 }
 
-module.exports = ExchangeRedisStore;
+module.exports = ExchangeJsonRedisStore;
 
-ExchangeRedisStore.prototype.constructor = ExchangeRedisStore; // make stacktraces readable
+ExchangeJsonRedisStore.prototype.constructor = ExchangeJsonRedisStore; // make stacktraces readable

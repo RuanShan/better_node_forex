@@ -1,85 +1,69 @@
-// http://stackoverflow.com/questions/34204304/nodejs-as-sse-client-wih-eventsource
-// open, high, low, close
-var fs = require('fs')
-var Log = require('log')
-var logger = new Log('debug', fs.createWriteStream('development.log'));
-global.logger = logger
-//var _ = require('underscore');
+// tidy data in redis, result: open, high, low, close
+var _ = require('underscore');
+var util = require('util');
+var redis = require("redis");
 var moment = require('moment');
 var ExchangeOhlcCollection = require("./src/exchange_ohlc_collection")
-var ExchangeDescription = require("./src/exchange_description")
-var EventSource = require('eventsource');
 
-var fields = ['Price','LastSettle','Open','High','Low','Close']
 // 美汇澳元,美元指数,美汇欧元,美汇英镑,美汇纽元,美汇加元,美汇瑞士,美汇港元,美汇日元,美元兑葡币	,美汇马币,美汇新元,美汇台币
-var symbols = [ 'USAUDUSD','USDINIW','USEURUSD','USGBPUSD','USNZDUSD','USUSDCAD','USUSDCHF','USUSDCNY','USUSDHKD','USUSDJPY','USUSDMOP','USUSDMYR','USUSDSGD','USUSDTWD']
-
-var url = "http://www.baring.cn/quo/bin/quotation.dll?fields=Price,LastSettle,Open,High,Low,Close,&symbols=USAUDUSD,USDINIW,USEURUSD,USGBPUSD,USNZDUSD,USUSDCAD,USUSDCHF,USUSDCNY,USUSDHKD,USUSDJPY,USUSDMOP,USUSDMYR,USUSDSGD,USUSDTWD,"
-headers = {
-  'Accept': 'text/event-stream',
-  'Accept-Encoding': 'gzip, deflate, sdch',
-  'Accept-Language': 'en-US,en;q=0.8',
-  'Cache-Control': 'no-cache',
-  'Connection': 'keep-alive',
-  'Host': 'www.baring.cn',
-  'Referer': 'http://www.baring.cn/quo/index.html',
-  'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.90 Safari/537.36'
-}
-var options = { 'headers': headers};
-
+var symbols = [ 'USDJPY'];
 
 var g_taskid = null;
-var g_es = null;
 var g_exchanges = null;
 
 //绘制蜡烛图的方法
 //http://www.cnblogs.com/zhongxinWang/p/4641032.html
+var redisClient = redis.createClient();
 
 function update_state() {
-    var now = new Date();
-    if( now.getSeconds() == 59 )
+    var now = moment();
+    if( now.second()%5 == 1 )
     {
+      var g_ohlcs = [];
+      for( var i=0; i< symbols.length; i++ )
+      {
+        var symbol = symbols[i];
+        // get prices within last min
+        var zkey = build_zkey( symbol, now);
+        var startAt = moment( ).subtract( 1, 'minutes').startOf('minute');
+        var endAt = moment( ).subtract( 1, 'minutes').endOf('minute');
 
-      logger.info("update_state closed at %s.",  moment().format('h:mm:ss'));
-      close_connection();
-      logger.info("update_state starting at %s.",  moment().format('h:mm:ss'));
-      startup_connection();
-      logger.info("update_state started at %s.",  moment().format('h:mm:ss'));
+        var args = [zkey, parseInt(startAt.format('x')), parseInt(endAt.format('x'))];
+
+        console.log("args  %s", util.inspect(args));
+        redisClient.zrangebyscore(args, function(err, response) {
+          if (err) throw err;
+          console.log("zrangebyscore  %s", util.inspect(response));
+          if( response.length >0)
+          {
+            var prices = _.map( response, function( item ){
+              return parseFloat( item.split('_')[1] );
+            })
+            var data = [ { symbol: symbol, open: prices[0], high: _.max(prices), low: _.min(prices), close: prices[prices.length -1] } ]
+            g_exchanges.pushMessage(data, endAt);
+          }
+        });
+        console.log("before pushMessage %s", util.inspect(g_ohlcs));
+      }
+      //console.log("yes in forex_history, symbol= %s, args=%s", symbol,args);
+      console.log("update_state  at %s.",  moment().format('h:mm:ss'));
     }
 }
 
 function close_connection()
 {
   clearInterval(g_taskid);
-  g_es.close();
 }
 
 function startup_connection()
 {
-  g_es = new EventSource(url, options);
-  g_exchanges = new ExchangeOhlcCollection( symbols, fields );
+  g_exchanges = new ExchangeOhlcCollection( symbols);
+  g_taskid = setInterval(update_state, 1000); // interval 1s
+}
 
 
-  g_es.onmessage = function (event) {
-    console.log(event.data);
-    var txt = /\[.*\]/.exec(event.data)[0];
-    var data = eval(txt);
-    //console.log("g_exchanges.push_count %s", g_exchanges.push_count );
-    if( g_exchanges.push_count == 0){
-      g_taskid = setInterval(update_state, 1000); // interval 1s
-      g_exchanges.pushMessage( data, moment() )
-    }
-  };
-
-  g_es.onerror = function(err) {
-    logger.error("eventsource error %s",  err );
-  };
-
-  g_es.onopen = function( event ){
-    logger.info("eventsource opened.");
-  }
-  g_es.onclose = function( event ){
-    logger.info("eventsource closed.");
-  }
+function build_zkey( symbol, now){
+  var key = "Z_"+ symbol +"_"+  now.startOf('week').startOf('day').format('x');
+  return key;
 }
 startup_connection();

@@ -1,14 +1,12 @@
 //var _ = require('underscore');
-var ExchangeDescription = require("./exchange_description")
+var ExchangeOhlcDescription = require("./exchange_ohlc_description")
 var ExchangeOhlcRedisStore = require("./exchange_ohlc_redis_store")
 
 // handle open/high/low/close data for candlestick chart
-function  ExchangeOhlcCollection( symbols, fields) {
+function  ExchangeOhlcCollection( symbols) {
       this.push_count = 0;
-      this.fields = fields;
       this.exchange_symbols = symbols;
       this.exchange_map = {};
-      this.symbol = null;
       this.lastupdate = new Date();
       this.exchange_redis_store = new ExchangeOhlcRedisStore()
       //var self = this;
@@ -25,17 +23,20 @@ function  ExchangeOhlcCollection( symbols, fields) {
 ExchangeOhlcCollection.prototype.pushMessage = function (data, time ) {
 
   this.lastupdate = time;
-  if( this.push_count==0 ){
-    this.exchange_map = {};
-    for( var i = 0; i< data.length; i++ )
+
+  this.exchange_map = {};
+  for( var i = 0; i< data.length; i++ )
+  {
+    var item = data[i];
+    var symbol = item.symbol;
+    console.log("initial %s, %s", i, symbol);
+    if( this.exchange_map[symbol] == null)
     {
-      var item = data[i];
-      this.symbol = item[0];
-      console.log(" initial %s, %s", i, this.symbol);
-      this.exchange_map[i] = new ExchangeDescription( this.symbol, this.fields, time, this.exchange_redis_store);
-      this.exchange_map[i].pushMessage( item, time );
+      this.exchange_map[symbol] = new ExchangeOhlcDescription( symbol, time, this.exchange_redis_store);
     }
+    this.exchange_map[symbol].pushMessage( item, time );
   }
+
   this.push_count += 1;
 }
 
