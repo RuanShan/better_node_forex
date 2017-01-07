@@ -25,7 +25,7 @@ app.use(logger('dev'));
 //app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-var defualt_symbols = "USUSDCNY";
+var defualt_symbols = "USDJPY";
 //app.use('/', index);
 //app.use('/users', users);
 app.get('/', function(req, res){
@@ -45,15 +45,18 @@ app.get('/forex_history/:symbol',function(req, res){
   var key = ["Z", symbol, moment().startOf('week').startOf('day').format('x')].join("_");
   if( candlesticks=='1')
   {
-    key = ["Z", symbol, "ohlc", moment().startOf('week').startOf('day').format('x').join("_");
+    key = ["Z", symbol, "ohlc", moment().startOf('week').startOf('day').format('x')].join("_");
   }
 
   var args = [key, parseInt(moment().subtract(60,'minutes').format('x')), parseInt(moment().format('x'))];
-  //console.log("yes in forex_history, symbol= %s, args=%s", symbol,args);
+  console.log("forex_history, symbol= %s, args=%s", symbol,args);
 
   publisherClient.zrangebyscore(args, function(err, response) {
     if (err) throw err;
-    res.header({'Access-Control-Allow-Origin': '*'}).json(response);
+    console.log("forex_history, %s", response);
+    data = {}
+    data[symbol] = response
+    res.header({'Access-Control-Allow-Origin': '*'}).json(data);
     return
   });
 
@@ -75,31 +78,6 @@ app.get('/sse/:symbols', function(req, res) {
   for( var i=0; i< symbols.length; i++)
   {
     var symbol = symbols[i];
-    var key = ["Z", symbol, moment().startOf('week').startOf('day').format('x')].join("_");
-
-    var args = [key, parseInt(moment().subtract(90,'minutes').format('x')), parseInt(moment().format('x'))];
-
-    publisherClient.zrangebyscore(args, function(err, response) {
-      if (err) throw err;
-
-      initialSymbolCount++;
-      var symbol = this.args[0].split('_')[1];
-      initialData[symbol] = response;
-      //console.log( "this.args=%s,symbol=%s, initialSymbolCount=%s,  symbols.length=%s, response=%s", this.args, symbol, initialSymbolCount, symbols.length, response);
-      if( initialSymbolCount == symbols.length)// 收集到所有选择的汇率数据，再发布到客户端
-      {
-        res.write('id: ' + 1 + '\n');
-        res.write('data: ' + JSON.stringify(initialData) + '\n');
-        res.write('\n\n');
-        initialData={}
-      }
-    });
-  }
-  messageCount++;
-
-  for( var i=0; i< symbols.length; i++)
-  {
-    var symbol = symbols[i];
     subscriber.subscribe(symbol);
   }
   // In case we encounter an error...print it out to the console
@@ -109,21 +87,21 @@ app.get('/sse/:symbols', function(req, res) {
 
   var currentData = {}
   var symbolCount = 0;
-    // When we receive a message from the redis connection
-    subscriber.on("message", function(channel, message) {
-      currentData[channel]= message;
-      symbolCount++;
-      if(symbolCount == symbols.length )
-      {
-        messageCount++; // Increment our message count
-        currentData['messageCount'] =  messageCount;
-        res.write('id: ' + messageCount + '\n');
-        res.write('data: ' + JSON.stringify( currentData ) + '\n');
-        res.write('\n\n'); // Note the extra newline
-        currentData = {};
-        symbolCount = 0;
-      }
-    });
+  // When we receive a message from the redis connection
+  subscriber.on("message", function(channel, message) {
+    currentData[channel]= message;
+    symbolCount++;
+    if(symbolCount == symbols.length )
+    {
+      messageCount++; // Increment our message count
+      currentData['messageCount'] =  messageCount;
+      res.write('id: ' + messageCount + '\n');
+      res.write('data: ' + JSON.stringify( currentData ) + '\n');
+      res.write('\n\n'); // Note the extra newline
+      currentData = {};
+      symbolCount = 0;
+    }
+  });
 
   //send headers for event-stream connection
   res.writeHead(200, {

@@ -91,4 +91,4 @@ function startup_connection()
 
 }
 
-g_taskid = setInterval(startup_connection, 500);
+g_taskid = setInterval(startup_connection, 1000);
