@@ -15,10 +15,10 @@ global.logger = logger
 
 var fields = ['price']
 // 美汇澳元,美元指数,美汇欧元,美汇英镑,美汇纽元,美汇加元,美汇瑞士,美汇港元,美汇日元,美元兑葡币	,美汇马币,美汇新元,美汇台币
-var symbols = [ 'USDJPY']
+var g_symbols = ['EURUSD','EURJPY','EURGBP','EURCHF','EURCAD','EURAUD','USDJPY', 'USDCAD','USDCHF']
 
 //var dataUrl = "http://123.57.1.244:18016/?query=price&type=jsonret&symbol=HSI,USDJPY"
-var dataUrl = "http://123.57.1.244:18016/?query=price&symbol=HSI,USDJPY"
+var dataUrl = "http://123.57.1.244:18016/?query=price&symbol=EURUSD,EURJPY,EURGBP,EURCHF,EURCAD,EURAUD,USDJPY,USDCAD,USDCHF"
 headers = {
   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
   'Accept-Encoding': 'gzip, deflate, sdch',
@@ -37,7 +37,7 @@ var options = { 'headers': headers};
 //}, false);
 var g_taskid = null;
 var g_es = null;
-var g_exchanges =  new ExchangeJsonCollection( symbols, fields );
+var g_exchanges =  new ExchangeJsonCollection( g_symbols, fields );
 ;
 
 function watchdog() {
@@ -66,8 +66,8 @@ function startup_connection()
   //if (parsedUrl.search) options.path += "?" + parsedUrl.search;
 
   request({uri:dataUrl }, function(error, response, body) {
-    console.log(response.statusCode) // 200
-    console.log(body) // 200
+    //console.log(response.statusCode) // 200
+    //console.log(body) // 200
 
     if (!error && response.statusCode == 200) {
       var items = body.split('#');

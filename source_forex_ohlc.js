@@ -6,7 +6,7 @@ var moment = require('moment');
 var ExchangeOhlcCollection = require("./src/exchange_ohlc_collection")
 
 // 美汇澳元,美元指数,美汇欧元,美汇英镑,美汇纽元,美汇加元,美汇瑞士,美汇港元,美汇日元,美元兑葡币	,美汇马币,美汇新元,美汇台币
-var symbols = [ 'USDJPY'];
+var g_symbols = ['EURUSD','EURJPY','EURGBP','EURCHF','EURCAD','EURAUD','USDJPY', 'USDCAD','USDCHF']
 
 var g_taskid = null;
 var g_exchanges = null;
@@ -17,12 +17,11 @@ var redisClient = redis.createClient();
 
 function update_state() {
     var now = moment();
-    if( now.second()%5 == 1 )
+    if( now.second() == 2 )
     {
-      var g_ohlcs = [];
-      for( var i=0; i< symbols.length; i++ )
+      for( var i=0; i< g_symbols.length; i++ )
       {
-        var symbol = symbols[i];
+        var symbol = g_symbols[i];
         // get prices within last min
         var zkey = build_zkey( symbol, now);
         var startAt = moment( ).subtract( 1, 'minutes').startOf('minute');
@@ -30,10 +29,12 @@ function update_state() {
 
         var args = [zkey, parseInt(startAt.format('x')), parseInt(endAt.format('x'))];
 
-        console.log("args  %s", util.inspect(args));
+        //console.log("args  %s", util.inspect(args));
         redisClient.zrangebyscore(args, function(err, response) {
           if (err) throw err;
-          console.log("zrangebyscore  %s", util.inspect(response));
+          //this.args: [ 'Z_USDCHF_1483804800000', 1483860660000, 1483860719999 ]
+          var symbol = this.args[0].split('_')[1];//
+          console.log("zrangebyscore %s", symbol );
           if( response.length >0)
           {
             var prices = _.map( response, function( item ){
@@ -43,7 +44,6 @@ function update_state() {
             g_exchanges.pushMessage(data, endAt);
           }
         });
-        console.log("before pushMessage %s", util.inspect(g_ohlcs));
       }
       //console.log("yes in forex_history, symbol= %s, args=%s", symbol,args);
       console.log("update_state  at %s.",  moment().format('h:mm:ss'));
@@ -57,7 +57,7 @@ function close_connection()
 
 function startup_connection()
 {
-  g_exchanges = new ExchangeOhlcCollection( symbols);
+  g_exchanges = new ExchangeOhlcCollection( g_symbols);
   g_taskid = setInterval(update_state, 1000); // interval 1s
 }
 

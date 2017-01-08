@@ -1,8 +1,10 @@
 var moment = require('moment');// datetime
+var util = require('util');
 var redis   = require('redis');
 var publisherClient = redis.createClient();
 var express = require('express');
 var path = require('path');
+var fs = require('fs')
 //var favicon = require('serve-favicon');
 var logger = require('morgan');
 //var cookieParser = require('cookie-parser');
@@ -10,6 +12,10 @@ var logger = require('morgan');
 
 //var index = require('./routes/index');
 //var users = require('./routes/users');
+
+// create a write stream (in append mode)
+var accessLogStream = fs.createWriteStream(__dirname + '/development.log', {flags: 'a'})
+
 
 var app = express();
 
@@ -19,7 +25,8 @@ app.set('view engine', 'jade');
 app.set('view options',{ layout: 'layout' });
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
+//app.use(logger('dev'));
+app.use(logger('combined', {stream: accessLogStream}))
 //app.use(bodyParser.json());
 //app.use(bodyParser.urlencoded({ extended: false }));
 //app.use(cookieParser());
@@ -40,7 +47,8 @@ app.get('/forex/:symbols', function(req, res){
 });
 
 app.get('/forex_history/:symbol',function(req, res){
-  var candlesticks = req.params.candlesticks
+
+  var candlesticks = req.query.candlesticks;
   var symbol =  req.params.symbol || defualt_symbols;
   var key = ["Z", symbol, moment().startOf('week').startOf('day').format('x')].join("_");
   if( candlesticks=='1')
@@ -49,11 +57,11 @@ app.get('/forex_history/:symbol',function(req, res){
   }
 
   var args = [key, parseInt(moment().subtract(60,'minutes').format('x')), parseInt(moment().format('x'))];
-  console.log("forex_history, symbol= %s, args=%s", symbol,args);
+  console.log("forex_history, candlesticks=%s, symbol= %s, args=%s", util.inspect(candlesticks), symbol,args);
 
   publisherClient.zrangebyscore(args, function(err, response) {
     if (err) throw err;
-    console.log("forex_history, %s", response);
+    //console.log("forex_history, %s", response);
     data = {}
     data[symbol] = response
     res.header({'Access-Control-Allow-Origin': '*'}).json(data);
