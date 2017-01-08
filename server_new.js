@@ -14,7 +14,7 @@ var logger = require('morgan');
 //var users = require('./routes/users');
 
 // create a write stream (in append mode)
-var accessLogStream = fs.createWriteStream(__dirname + '/development.log', {flags: 'a'})
+//var accessLogStream = fs.createWriteStream(__dirname + '/development.log', {flags: 'a'})
 
 
 var app = express();
@@ -26,7 +26,7 @@ app.set('view options',{ layout: 'layout' });
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 //app.use(logger('dev'));
-app.use(logger('combined', {stream: accessLogStream}))
+app.use(logger('combined'))
 //app.use(bodyParser.json());
 //app.use(bodyParser.urlencoded({ extended: false }));
 //app.use(cookieParser());
@@ -49,7 +49,7 @@ app.get('/forex/:symbols', function(req, res){
 app.get('/forex_history/:symbol',function(req, res){
 
   var candlesticks = req.query.candlesticks;
-  var symbol =  req.params.symbol || defualt_symbols;
+  var symbol =  req.params.symbol 
   var key = ["Z", symbol, moment().startOf('week').startOf('day').format('x')].join("_");
   if( candlesticks=='1')
   {

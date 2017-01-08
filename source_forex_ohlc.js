@@ -17,15 +17,15 @@ var redisClient = redis.createClient();
 
 function update_state() {
     var now = moment();
-    if( now.second() == 2 )
+    if( now.second() == 5 )
     {
       for( var i=0; i< g_symbols.length; i++ )
       {
         var symbol = g_symbols[i];
         // get prices within last min
         var zkey = build_zkey( symbol, now);
-        var startAt = moment( ).subtract( 1, 'minutes').startOf('minute');
-        var endAt = moment( ).subtract( 1, 'minutes').endOf('minute');
+        var startAt = moment( ).subtract( 1, 'minutes').seconds(1);
+        var endAt = moment( ).startOf('minute');
 
         var args = [zkey, parseInt(startAt.format('x')), parseInt(endAt.format('x'))];
 
