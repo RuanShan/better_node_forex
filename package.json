@@ -25,6 +25,7 @@
     "redis": "~2.6.3",
     "eventsource": "~0.2.1",
     "underscore": "~1.8.3",
+    "request": "~2.79.0",
     "morgan": "~1.7.0"
   }
 }
