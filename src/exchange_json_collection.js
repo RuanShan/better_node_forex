@@ -23,7 +23,7 @@ ExchangeJsonCollection.prototype.pushMessage = function (data, time ) {
         for( var i = 0; i< data.length; i++ )
         {
           var item = data[i];
-          console.log("ExchangeJsonCollection.pushMessage: initial %s, %s", i, item.symbol);
+          //console.log("ExchangeJsonCollection.pushMessage: initial %s, %s", i, item.symbol);
           this.exchange_map[item.symbol] = new ExchangeJsonDescription( item.symbol, this.price, (time), this.exchange_redis_store);
           this.exchange_map[item.symbol].pushMessage( item, time );
         }

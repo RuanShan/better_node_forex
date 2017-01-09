@@ -80,7 +80,7 @@ function startup_connection()
         }
       }
 
-      console.log(util.inspect(prices));
+      //console.log(util.inspect(prices));
       //console.log(body) // Show the HTML for the Google homepage.
       g_exchanges.pushMessage( prices, moment() )
     }else{

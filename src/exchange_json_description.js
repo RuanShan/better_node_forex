@@ -28,7 +28,7 @@ function  ExchangeJsonDescription( symbol, fields, time, exchange_redis_store ) 
       //#}
       this.new_value = item.price
 
-      console.log( "ExchangeJsonDescription: initial " + this.symbol + time.format("HH:mm:ss")+ " " + this.new_value );
+      //console.log( "ExchangeJsonDescription: initial " + this.symbol + time.format("HH:mm:ss")+ " " + this.new_value );
       //logger.debug( "initial " + symbol + " " + this.new_value );
     }
 }
@@ -46,7 +46,7 @@ ExchangeJsonDescription.prototype.pushMessage = function (data, time ) {
         this.quotations.splice(0, 3600);
       }
       this.quotations.push( new_quotation );
-      console.log( "ExchangeJsonDescription:pushMessage" + data.symbol + " " + time.format("HH:mm:ss") + " " + new_quotation.new_value );
+      //console.log( "ExchangeJsonDescription:pushMessage" + data.symbol + " " + time.format("HH:mm:ss") + " " + new_quotation.new_value );
       this.exchange_redis_store.store( new_quotation );
 
   }
