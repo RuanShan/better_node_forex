@@ -20,7 +20,7 @@ var g_forexs = ['EURUSD','EURJPY','EURGBP','EURCHF','EURCAD','EURAUD','USDJPY', 
 //XAGUSD	白银 XAUUSD	黄金  XPTUSD	铂金 XPDUSD	钯金
 var g_products = ['US_OIL', 'UK_OIL', 'COPPER', 'SOYBEAN', 'NATGAS','XAGUSD','XAUUSD'];
 //HIS	恒生指数  NAS100	纳斯达克指数 DAX30	德国股指 CHINA50	富时A50 DJ30	道琼斯指数 NK225	日经指数 FT100	英国富时指数 SP500	普尔指数
-var g_indexes = ['HIS','NAS100','DAX30','CHINA50','DJ30','NK225','FT100','SP500'];
+var g_indexes = ['HSI','NAS100','DAX30','CHINA50','DJ30','NK225','FT100','SP500'];
 var g_symbols = [].concat(  g_indexes );
 
 //var dataUrl = "http://123.57.1.244:18016/?query=price&type=jsonret&symbol=HSI,USDJPY"

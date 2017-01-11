@@ -17,10 +17,10 @@ var fields = ['price']
 // 欧元/美金,欧元/日元,欧元/英镑,欧元/瑞郎,欧元/加元,欧元/澳元,美元/日元,美元/加元,美元/瑞郎
 var g_forexs = ['EURUSD','EURJPY','EURGBP','EURCHF','EURCAD','EURAUD','USDJPY', 'USDCAD','USDCHF']
 //US_OIL	美国原油  UK_OIL	英国原油 COPPER	铜  SOYBEAN	大豆 NATGAS	天然气
-//XAGUSD	白银 XAUUSD	黄金  XPTUSD	铂金 XPDUSD	钯金
-var g_products = ['US_OIL', 'UK_OIL', 'COPPER', 'SOYBEAN', 'NATGAS','XAGUSD','XAUUSD'];
+//XAGUSD	白银  GOLD	黄金  XPTUSD	铂金 XPDUSD	钯金
+var g_products = ['US_OIL', 'UK_OIL', 'COPPER', 'SOYBEAN', 'NATGAS','XAGUSD','GOLD'];
 //HIS	恒生指数  NAS100	纳斯达克指数 DAX30	德国股指 CHINA50	富时A50 DJ30	道琼斯指数 NK225	日经指数 FT100	英国富时指数 SP500	普尔指数
-var g_indexes = ['HIS','NAS100','DAX30','CHINA50','DJ30','NK225','FT100','SP500'];
+var g_indexes = ['HSI','NAS100','DAX30','CHINA50','DJ30','NK225','FT100','SP500'];
 var g_symbols = [].concat( g_products );
 
 //var dataUrl = "http://123.57.1.244:18016/?query=price&type=jsonret&symbol=HSI,USDJPY"
@@ -73,7 +73,7 @@ function startup_connection()
 
   request({uri:dataUrl }, function(error, response, body) {
     //console.log(response.statusCode) // 200
-    //console.log(body) // 200
+    //console.log(body,dataUrl) // 200
 
     if (!error && response.statusCode == 200) {
       var items = body.split('#');
