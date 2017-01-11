@@ -38,7 +38,14 @@ function update_state() {
         redisClient.zrangebyscore(args, function(err, response) {
           if (err) throw err;
           //this.args: [ 'Z_USDCHF_1483804800000', 1483860660000, 1483860719999 ]
-          var symbol = this.args[0].split('_')[1];//
+          var key = this.args[0];
+          var symbol = key.split('_')[1];//
+          if( key.search(/UK_OIL/) != -1){
+            symbol = "UK_OIL"
+          }
+          if( key.search(/US_OIL/) != -1){
+            symbol = "US_OIL"
+          }
           console.log("zrangebyscore %s", symbol );
           if( response.length >0)
           {
