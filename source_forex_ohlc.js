@@ -6,7 +6,7 @@ var moment = require('moment');
 var ExchangeOhlcCollection = require("./src/exchange_ohlc_collection")
 
 // 美汇澳元,美元指数,美汇欧元,美汇英镑,美汇纽元,美汇加元,美汇瑞士,美汇港元,美汇日元,美元兑葡币	,美汇马币,美汇新元,美汇台币
-var g_symbols = ['EURUSD','EURJPY','EURGBP','EURCHF','EURCAD','EURAUD','USDJPY', 'USDCAD','USDCHF']
+var g_symbols = ['EURUSD','EURJPY','EURGBP','EURCHF','EURCAD','EURAUD','EURNZD', 'USDJPY', 'USDCAD','USDCHF']
 
 var g_taskid = null;
 var g_exchanges = null;

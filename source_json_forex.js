@@ -14,11 +14,15 @@ global.logger = logger
 
 
 var fields = ['price']
-// 美汇澳元,美元指数,美汇欧元,美汇英镑,美汇纽元,美汇加元,美汇瑞士,美汇港元,美汇日元,美元兑葡币	,美汇马币,美汇新元,美汇台币
-var g_symbols = ['EURUSD','EURJPY','EURGBP','EURCHF','EURCAD','EURAUD','USDJPY', 'USDCAD','USDCHF']
+// 美元/加元 美元/瑞郎 美元/日元 欧元/澳元 欧元/加元 欧元/瑞郎 欧元/英镑 欧元/日元 欧元/美金 欧元/纽元
+// GBPAUD	英镑/澳元  GBPCAD	英镑/加元  GBPJPY	英镑/日元  GBPUSD	英镑/美元  GBPCHF	英镑/瑞郎
+// AUDCHF	澳元/瑞郎  AUDJPY	澳元/日元  AUDUSD	澳元/美金  AUDNZD	澳元/纽元  NZDUSD	纽元/美金  NZDJPY	纽元/日元
+
+var g_symbols = ['EURUSD','EURJPY','EURGBP','EURCHF','EURCAD','EURAUD','EURNZD','USDJPY', 'USDCAD','USDCHF',
+ 'GBPAUD','GBPCAD','GBPJPY','GBPUSD', 'GBPCHF','AUDCHF','AUDJPY','AUDUSD','AUDNZD','NZDUSD','NZDJPY']
 
 //var dataUrl = "http://123.57.1.244:18016/?query=price&type=jsonret&symbol=HSI,USDJPY"
-var dataUrl = "http://123.57.1.244:18016/?query=price&symbol=EURUSD,EURJPY,EURGBP,EURCHF,EURCAD,EURAUD,USDJPY,USDCAD,USDCHF"
+var dataUrl = "http://123.57.1.244:18016/?query=price&symbol="+g_symbols.join(',')
 headers = {
   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
   'Accept-Encoding': 'gzip, deflate, sdch',
@@ -67,7 +71,7 @@ function startup_connection()
 
   request({uri:dataUrl }, function(error, response, body) {
     //console.log(response.statusCode) // 200
-    //console.log(body) // 200
+    console.log(body) // 200
 
     if (!error && response.statusCode == 200) {
       var items = body.split('#');

@@ -6,7 +6,8 @@ var moment = require('moment');
 var ExchangeOhlcCollection = require("./src/exchange_ohlc_collection")
 
 // 欧元/美金,欧元/日元,欧元/英镑,欧元/瑞郎,欧元/加元,欧元/澳元,美元/日元,美元/加元,美元/瑞郎
-var g_forexs = ['EURUSD','EURJPY','EURGBP','EURCHF','EURCAD','EURAUD','USDJPY', 'USDCAD','USDCHF']
+var g_forexs = ['EURUSD','EURJPY','EURGBP','EURCHF','EURCAD','EURAUD','EURNZD','USDJPY', 'USDCAD','USDCHF',
+ 'GBPAUD','GBPCAD','GBPJPY','GBPUSD', 'GBPCHF','AUDCHF','AUDJPY','AUDUSD','AUDNZD','NZDUSD','NZDJPY']
 //US_OIL	美国原油  UK_OIL	英国原油 COPPER	铜  SOYBEAN	大豆 NATGAS	天然气
 //XAGUSD	白银 XAUUSD	黄金  XPTUSD	铂金 XPDUSD	钯金
 var g_products = ['US_OIL', 'UK_OIL', 'COPPER', 'SOYBEAN', 'NATGAS','XAGUSD','GOLD'];
