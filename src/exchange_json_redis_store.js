@@ -95,10 +95,10 @@ function  ExchangeJsonRedisStore(  ) {
 
           var quote_highlow = response
           if( quote_highlow ){
-            console.log( " quote_highlow=%s", quote_highlow)
+            console.log( " quote_highlow=%s current_quote=%s", quote_highlow, quote)
             var hack_quote = parseFloat( quote_highlow )
             var highlow = parseInt( quote_highlow.split('_')[1])
-            if( highlow == 1 && hack_quote < quote  )
+            if( highlow == 1 && hack_quote > quote  )
             {
               if( time.seconds() == 0 )
               {
@@ -113,7 +113,7 @@ function  ExchangeJsonRedisStore(  ) {
 
               client.zadd( [hackquote_zkey, time.format('x'), val] )
               client.pexpireat([hackquote_zkey, expire_at])
-            } else if ( highlow == 0 && quote > hack_quote  )
+            } else if ( highlow == 0 && hack_quote < quote  )
             {
               if( time.seconds() == 0 )
               {
