@@ -64,6 +64,7 @@ function  ExchangeJsonRedisStore(  ) {
       var now = moment(time);
       var key = symbol +"_"+  now.startOf('week').startOf('day').format('x');
       var zkey = this.build_zkey( symbol, now);
+      var real_val = time.format('x') +"_" + obj.new_value+"_" + obj.price_timestamp;
       var val = time.format('x') +"_" + obj.new_value+"_" + obj.price_timestamp; // we could order it in client.
       var quote = parseFloat(obj.new_value)
           //http://momentjs.com/docs/#/displaying/
@@ -71,16 +72,16 @@ function  ExchangeJsonRedisStore(  ) {
           //Unix Millisecond Timestamp	x	1360013296123
           // 一周过期，键值 = 数据格式类型 + 业务类型 + 一周开始时间
           //this.client.hmset( hmkey, parseInt(time.format('x')), obj.new_value )
-      if ( obj instanceof ExchangeJsonQuotation) {
-        console.log("store Quotation %s,%s", zkey, val  );
-        //this.client.hmset( hmkey, parseInt(time.format('x')), obj.new_value )
-        // it has to be uniq, add Timestamp as suffix
-        this.client.zadd( [zkey, time.format('x'), val] )
-      }
-      this.set_expire( obj);
+      //if ( obj instanceof ExchangeJsonQuotation) {
+      //  console.log("store Quotation %s,%s", zkey, val  );
+      //  //this.client.hmset( hmkey, parseInt(time.format('x')), obj.new_value )
+      //  // it has to be uniq, add Timestamp as suffix
+      //  this.client.zadd( [zkey, time.format('x'), val] )
+      //  this.set_expire( obj);
+      //}
       // before publish
       // in last 5 seconds, handle quote heck
-      console.log( "time.seconds = %s ", time.toString());
+      //console.log( "time.seconds = %s ", time.toString());
       if (  time.seconds()>55 || time.seconds() < 5 )
       {
         var hackquote_zkey = this.build_hackquote_zkey(symbol, moment(time) )
@@ -92,51 +93,59 @@ function  ExchangeJsonRedisStore(  ) {
           //console.log( "argv=%s, symbol=%s, err=%s response=%s", util.inspect(this.args), symbol, err, response)
           if(err) return;
           var expire_at = moment(time).startOf('week').startOf('day').add(1, 'weeks').format('x');
-
+          var hack_val = val;
           var quote_highlow = response
           if( quote_highlow ){
             console.log( " quote_highlow=%s current_quote=%s", quote_highlow, quote)
             var hack_quote = parseFloat( quote_highlow )
+            var new_quote = hack_quote
             var highlow = parseInt( quote_highlow.split('_')[1])
             if( highlow == 1 && hack_quote > quote  )
             {
               if( time.seconds() == 0 )
               {
                 console.log( " seconds= %s,original =%s, hack =%s", time.seconds(), quote, hack_quote);
-                quote = hack_quote;
+                new_quote = hack_quote;
               }else{
                 console.log( " seconds= %s,original =%s, hack =%s", time.seconds(), quote, quote + (hack_quote -quote)/2);
-                quote = quote + (hack_quote -quote)/2
-                quote = Math.floor(quote*100000)*1.0/100000
+                new_quote = quote + (hack_quote -quote)/2
+                new_quote = Math.floor(quote*100000)*1.0/100000
               }
-              val = time.format('x') +"_" + quote +"_" + obj.price_timestamp;
-
-              client.zadd( [hackquote_zkey, time.format('x'), val] )
+              hack_val = time.format('x') +"_" + new_quote +"_" + obj.price_timestamp;
+              // 存储真实数据
+              client.zadd( [hackquote_zkey, time.format('x'), real_val] )
               client.pexpireat([hackquote_zkey, expire_at])
             } else if ( highlow == 0 && hack_quote < quote  )
             {
               if( time.seconds() == 0 )
               {
                 console.log( " seconds= %s,original =%s, hack =%s", time.seconds(), quote, hack_quote);
-                quote = hack_quote;
+                new_quote = hack_quote;
               }else{
                 console.log( " seconds= %s,original =%s, hack =%s", time.seconds(), quote, quote + (hack_quote -quote)/2);
-                quote = quote + (hack_quote -quote)/2
-                quote = Math.floor(quote*100000)*1.0/100000
+                new_quote = quote + (hack_quote -quote)/2
+                new_quote = Math.floor(quote*100000)*1.0/100000
               }
-              val = time.format('x') +"_" + quote +"_" + obj.price_timestamp;
-              client.zadd( [hackquote_zkey, time.format('x'), val] )
+              hack_val = time.format('x') +"_" + new_quote +"_" + obj.price_timestamp;
+              // 存储真实数据
+              client.zadd( [hackquote_zkey, time.format('x'), real_val] )
               client.pexpireat([hackquote_zkey, expire_at])
 
             }
           }
-          client.publish( obj.symbol, val );
+          console.log( " zkey= %s,val =%s, hack_val =%s", zkey, val, hack_val);
+          client.zadd( [zkey, time.format('x'), hack_val] )
+          client.publish( obj.symbol, hack_val );
 
         })
 
       }else{
+        //console.log("store Quotation %s,%s", zkey, val  );
+        this.client.zadd( [zkey, time.format('x'), val] )
         this.client.publish( obj.symbol, val );
       }
+      this.set_expire( obj);
+
     }
 
     this.build_zkey = function( symbol, now){
