@@ -82,7 +82,7 @@ function  ExchangeJsonRedisStore(  ) {
       // before publish
       // in last 5 seconds, handle quote heck
       //console.log( "time.seconds = %s ", time.toString());
-      if (  time.seconds()>55 || time.seconds() < 5 )
+      if (  time.seconds()>50 || time.seconds() < 10 )
       {
         var hackquote_zkey = this.build_hackquote_zkey(symbol, moment(time) )
         var hackquote_hkey = this.build_hackquote_hkey(now )
@@ -133,7 +133,7 @@ function  ExchangeJsonRedisStore(  ) {
 
             }
           }
-          console.log( " zkey= %s,val =%s, hack_val =%s", zkey, val, hack_val);
+          //console.log( " zkey= %s,val =%s, hack_val =%s", zkey, val, hack_val);
           client.zadd( [zkey, time.format('x'), hack_val] )
           client.publish( obj.symbol, hack_val );
 
